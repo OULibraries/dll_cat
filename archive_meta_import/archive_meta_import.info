@@ -1,0 +1,7 @@
+name = Archive Meta Import
+description = OAI-PMH Fetcher and Parser.
+core = 7.x
+package = Custom
+dependencies[] = querypath
+files[] = archive_meta_import.admin.inc
+files[] = archive_meta_import.helpers.inc

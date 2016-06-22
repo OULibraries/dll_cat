@@ -1,0 +1,57 @@
+<?php
+/**
+ * @file
+ * Installation file for the Meta Link Author Module.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function meta_link_schema() {
+  $schema = array();
+  $schema['meta_link_data'] = array(
+  	'description' => 'Stores mappings data for works and archive records',
+  	'fields' => array(
+  		'id' => array(
+  			'description' => 'Unique id for each row',
+  			'type' => 'serial',
+  			'unsigned' => TRUE,
+  			'not null' => TRUE,
+  		),
+  		'record_id' => array(
+  			'description' => 'Entity id for the metadata record node',
+  			'type' => 'int',
+  			'not null' => TRUE,
+  		),
+  		'recommended_work_id' => array(
+  			'description' => 'Entity id for the work node',
+  			'type' => 'int',
+  		),
+  		'algorithm_step' => array(
+  			'description' => 'Step of matching algorithm during which the match was found',
+  			'type' => 'int',
+  			'not null' => TRUE,
+  			'default'=> 0,
+  		),
+  		'match_score' => array(
+  			'description' => 'Match confidence score',
+  			'type' => 'float',
+  			'not null' => TRUE,
+  			'default'=> 0,
+  		),
+  	),
+  	'primary key' => array('id'),
+  );
+  return $schema;
+}
+
+/**
+ * Implements hook_update_N().
+ *
+ * Adds a table for storing matcher data.
+ */
+function meta_link_update_7001() {
+	$schema = module_invoke('meta_link', 'schema');
+  $table_name = 'meta_link_data';
+  db_create_table($table_name, $schema[$table_name]);
+}

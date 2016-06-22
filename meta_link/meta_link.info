@@ -1,0 +1,7 @@
+name = Meta Link
+description = Link Work nodes to the archive recordes nodes.
+core = 7.x
+package = Custom
+files[] = meta_link.install
+files[] = meta_link.helpers.inc
+dependencies[] = entityreference

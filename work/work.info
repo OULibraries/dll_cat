@@ -1,0 +1,10 @@
+name = work
+core = 7.x
+package = Features
+dependencies[] = features
+dependencies[] = node
+dependencies[] = text
+dependencies[] = de_components
+features[features_api][] = api:2
+features[field_instance][] = node-dll_work-body
+features[node][] = dll_work
