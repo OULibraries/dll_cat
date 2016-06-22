@@ -127,7 +127,7 @@ function _meta_link_look_up_primary(&$context) {
 				$context['results']['records'][$i]->match_score = 0;
 			}
 			$context['sandbox']['progress']++;
-			$context['message'] = t('Now matching nid %nid', array('%nid' => $context['records'][$i]->nid));
+			$context['message'] = t('Now matching nid %nid', array('%nid' => $context['results']['records'][$i]->nid));
 		}
 
 		if ($context['sandbox']['progress'] < $context['sandbox']['max']) {
@@ -166,7 +166,7 @@ function _meta_link_check_soundex(&$context) {
 					$best_score = 1000;
 					foreach($title_arr as $title) {
 						$work_match_raw = _meta_link_soundex_query($title);
-						if (isset($work_match_raw) && $work_match_raw->score < $best_score) {
+						if (isset($work_match_raw) && is_object($work_match_raw) && $work_match_raw->score < $best_score) {
 							$work_match = $work_match_raw;
 							$best_score = $work_match_raw->score;
 						}
@@ -189,7 +189,7 @@ function _meta_link_check_soundex(&$context) {
 				}
 			}
 			$context['sandbox']['progress']++;
-			$context['message'] = t('Now matching nid %nid using soundex', array('%nid' => $context['records'][$i]->nid));
+			$context['message'] = t('Now matching nid %nid using soundex', array('%nid' => $context['results']['records'][$i]->nid));
 		}
 
 		if ($context['sandbox']['progress'] < $context['sandbox']['max']) {
