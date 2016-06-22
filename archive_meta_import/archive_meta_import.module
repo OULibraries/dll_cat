@@ -70,7 +70,11 @@ function archive_meta_import_cron_queue_info() {
 function _archive_meta_import_process_urls_worker($item) {
 	$data = _archive_meta_import_get_xml($item);
 	if (isset($data) && !empty($data)) {
-		_archive_meta_import_metadata_queue_populate($data);
+		_archive_meta_import_metadata_queue_populate($data, $item);
+		watchdog('archive_meta_import', t('Metadata was successfully harvested from url: @item', array('@item' => $item)), array(), WATCHDOG_NOTICE);
+	}
+	else {
+		watchdog('archive_meta_import', t('Unable to parse data from url: @item',  array('@item' => $item)), array(), WATCHDOG_NOTICE);
 	}
 }
 
@@ -80,11 +84,15 @@ function _archive_meta_import_process_urls_worker($item) {
  * @see hook_cron_queue_info().
  */
 function _archive_meta_import_metadata_worker($item) {
-	$metadata = _archive_meta_import_parse_xml($item);
+	$metadata = _archive_meta_import_parse_xml($item['data']);
 	if (isset($metadata) && !empty($metadata) && is_array($metadata)) {
 		foreach ($metadata as $record) {
 			_archive_meta_import_records_queue_populate($record);
 		}
+		watchdog('archive_meta_import', t('Metadata was parsed successfully from url: @item', array('@item' => $item['url'])), array(), WATCHDOG_NOTICE);
+	}
+	else {
+		watchdog('archive_meta_import', t('Failed to parse metadata from url: @item', array('@item' => $item['url'])), array(), WATCHDOG_NOTICE);
 	}
 }
 

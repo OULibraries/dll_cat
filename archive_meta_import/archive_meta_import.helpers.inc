@@ -199,6 +199,7 @@ function _archive_meta_import_check_node_by_identifier($identifier) {
  */
 function _archive_meta_import_set_field_values($data, $identifier, $wrapper, $entity, $repo) {
 	// setting Record title field (not a node title field).
+	$wrapper->field_record_title = array();
 	foreach ($data['title'] as $title) {
 		$wrapper->field_record_title[] = $title;
 	}
@@ -303,9 +304,10 @@ function _archive_meta_import_urls_queue_populate() {
  * @param str data
  *		XML string.
  */
-function _archive_meta_import_metadata_queue_populate($data) {
+function _archive_meta_import_metadata_queue_populate($data, $item) {
 	$queue = DrupalQueue::get('archive_meta_import_metadata');
-	$queue->createItem($data);
+	$i = array('url' => $item, 'data' => $data,);
+	$queue->createItem($i);
 }
 
 /**
