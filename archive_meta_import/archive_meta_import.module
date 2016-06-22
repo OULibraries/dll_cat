@@ -26,9 +26,12 @@ function archive_meta_import_menu() {
  * Implements hook_cron().
  */
 function archive_meta_import_cron() {
-
-  // populating urls queue.
-  _archive_meta_import_urls_queue_populate();
+	$is_scheduled = variable_get('meta_import_scheduled', FALSE);
+  if ($is_scheduled) {
+  	// populating urls queue.
+  	_archive_meta_import_urls_queue_populate();
+  	variable_set('meta_import_scheduled', FALSE);
+  }
 }
 
 /**
@@ -36,7 +39,6 @@ function archive_meta_import_cron() {
  */
 
 function archive_meta_import_cron_queue_info() {
-	// TODO: remove skip on cron
 	$queues = array();
 	// queue of repositories urls
 	$queues['archive_meta_import_process_urls'] = array(

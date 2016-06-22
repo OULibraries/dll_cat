@@ -31,7 +31,6 @@ function archive_meta_import_admin_form($form, &$form_state) {
 		'#suffix' => '</div>',
 		'#description' => t('These repositories URLs will be used during the next scheduled import.'),
 	);
-
 	if ($form_state['storage']['meta_repo_urls'] !== NULL) {
 		for ($i = 0; $i <= $form_state['storage']['meta_repo_urls']; $i++) {
 			$form['meta_repo_urls'][$i] = array(
@@ -44,6 +43,7 @@ function archive_meta_import_admin_form($form, &$form_state) {
 				'#title_display' => 'invisible',
 				'#type' => 'textfield',
 				'#default_value' => isset($default_urls[$i]) ? $default_urls[$i] : '',
+				'#description' => isset($default_urls[$i]['url']) ? '<strong>Domain: </strong>' . parse_url($default_urls[$i]['url'])['host'] : '',
 			);
 		}
 	}
@@ -60,9 +60,28 @@ function archive_meta_import_admin_form($form, &$form_state) {
 
 	$form_state['storage']['meta_repo_urls']++;
 
+	$form['actions']['schedule_import'] = array(
+		'#type' => 'button',
+		'#value' => t('Schedule Import'),
+		'#executes_submit_callback' => TRUE,
+	);
+
+	$form['#submit'][] = 'archive_meta_import_schedule_import';
+
 	return system_settings_form($form);
 }
 
+/**
+ * Submit callback for the import configuration form.
+ *
+ * @see archive_meta_import_admin_form().
+ */
+function archive_meta_import_schedule_import($form,  &$form_state) {
+	if ($form_state['clicked_button']['#value'] == 'Schedule Import') {
+		variable_set('meta_import_scheduled', TRUE);
+		drupal_set_message(t('Import was scheduled.'), 'status', FALSE);
+	}
+}
 
 /**
  * AJAX callback function
