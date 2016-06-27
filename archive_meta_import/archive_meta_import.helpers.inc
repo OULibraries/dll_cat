@@ -45,6 +45,9 @@ function _archive_meta_import_get_xml($url) {
  */
 function _archive_meta_import_parse_xml($data) {
 	$parsed_data = array();
+	if(!$data) {
+		return $parsed_data;
+	}
 	$xml = simplexml_load_string($data);
 	if (isset($xml)) {
 		$xml_bc = clone($xml);
@@ -168,6 +171,9 @@ function _archive_meta_import_update_meta_node($nid, $data, $identifier, $repo) 
  *		unique identifier of the record.
  */
 function _archive_meta_import_check_node_by_identifier($identifier) {
+	if (!$identifier || empty($identifier)) {
+		return FALSE;
+	}
 	$query = db_select('node', 'n');
 	$query->fields('n', array('nid'));
 	$query->join('field_data_field_unique_identifier', 'id', 'id.entity_id = n.nid');

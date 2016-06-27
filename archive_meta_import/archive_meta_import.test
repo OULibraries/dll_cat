@@ -1,0 +1,131 @@
+<?php
+/**
+ * @file
+ * implements simpletest tests for the module.
+ */
+
+class ArchiveMetaImportTestCase extends DrupalUnitTestCase {
+
+	public static function getInfo() {
+   	return array(
+    	'name' => 'Archive Metadata Import unit test',
+    	'description' => 'Test that archive metadata import and parsing works properly.',
+    	'group' => 'Archive Metadata',
+  	);
+	}
+
+	/**
+ 	 * Tests fetching url from the settings variable and running a curl request.
+	 */
+	public function testUrlFetching() {
+		$result = _archive_meta_import_get_xml(NULL);
+		$message = 'A NULL value should return FALSE';
+		$this->assertFalse($result, $message);
+
+		$result = _archive_meta_import_get_xml('');
+		$message = 'An "empty" value should return FALSE';
+		$this->assertFalse($result, $message);
+
+		$result = _archive_meta_import_get_xml('http://www.e-codices.unifr.ch/oai/oai.php?verb=ListRecords&metadataPrefix=oai_dc&set=fmb');
+		$message = 'Not empty, correct URL return TRUE';
+		if ($result) {
+			$result = TRUE;
+		}
+		$this->assertTrue($result, $message);
+
+	}
+
+	/**
+ 	 * Tests parsing data.
+	 */
+	public function testDataParsing() {
+		$data = '<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="oai2.xsl"?>
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/
+         http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+ <responseDate>2016-06-27T17:34:28Z</responseDate>
+ <request verb="ListRecords" metadataPrefix="oai_dc" set="fmb">http://www.e-codices.unifr.ch/oai/oai.php</request>
+ <ListRecords>
+  <record>
+   <header>
+    <identifier>http://www.e-codices.unifr.ch/en/list/one/fmb/cb-0550</identifier>
+    <datestamp>2015-10-08</datestamp>
+    <setSpec>fmb</setSpec>
+   </header>
+   <metadata>
+     <oai_dc:dc
+       xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"
+       xmlns:dc="http://purl.org/dc/elements/1.1/"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/
+       http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+      <dc:title>Cologny, Fondation Martin Bodmer, Cod. Bodmer 550 : “The story of Seyf ol-Molûk and Badî`ol-Jamâl&quot;</dc:title>
+      <dc:description>This manuscript, written in Persian, contains the story of Prince Seyf ol-Molûk and Princess Badî`ol-Jamâl. The manuscript was probably written in India and illustrated with 32 miniatures. At the end of the text (f. 56v), the scribe dated the manuscript in the year 1033 (in the Islamic calendar). The story can also be found in One Thousand and One Nights (758th to 778th night, edition Calcutta II 1839-1842).</dc:description>
+      <dc:publisher>e-codices - Virtual Manuscript Library of Switzerland</dc:publisher>
+      <dc:date>1623/24 :: notBefore 1623 :: notAfter 1623</dc:date>
+      <dc:type>Manuscript</dc:type>
+      <dc:format>Paper, 56 ff., 24.1 x 15.2 cm</dc:format>
+      <dc:identifier>doi:10.5076/e-codices-fmb-cb-0550</dc:identifier>
+      <dc:identifier>http://www.e-codices.unifr.ch/en/list/one/fmb/cb-0550</dc:identifier>
+      <dc:identifier>Cologny, Fondation Martin Bodmer, Cod. Bodmer 550</dc:identifier>
+      <dc:source>http://www.e-codices.unifr.ch/en/list/one/fmb/cb-0550</dc:source>
+      <dc:language>Persian</dc:language>
+      <dc:relation>-</dc:relation>
+      <dc:coverage>[India]</dc:coverage>
+      <dc:rights>e-codices / Cologny, Fondation Martin Bodmer (cf. http://www.e-codices.unifr.ch/en/about/terms)</dc:rights>
+      <dc:preview_page>http://www.e-codices.unifr.ch/loris/fmb/fmb-cb-0550/fmb-cb-0550_007v.jp2/full/,150/0/default.jpg</dc:preview_page>
+     </oai_dc:dc>
+   </metadata>
+  </record>
+	</ListRecords></OAI-PMH>';
+
+		$result = _archive_meta_import_parse_xml($data);
+		$message = 'A correct XML should return TRUE';
+		if (!empty($result) && is_array($result)) {
+			$result = TRUE;
+		}
+		$this->assertTrue($result, $message);
+
+		$result = _archive_meta_import_parse_xml('');
+		$message = 'Empty data should return FALSE';
+		if (empty($result)) {
+			$result = FALSE;
+		}
+		$this->assertFalse($result, $message);
+
+		$result = _archive_meta_import_parse_xml(FALSE);
+		$message = 'FALSE data should return FALSE';
+		if (empty($result)) {
+			$result = FALSE;
+		}
+		$this->assertFalse($result, $message);
+		$result = _archive_meta_import_parse_xml(NULL);
+		$message = 'NULL should return FALSE';
+		if (empty($result)) {
+			$result = FALSE;
+		}
+		$this->assertFalse($result, $message);
+
+	}
+
+	/**
+	 * Tests if nodes can be found by identifier.
+	 */
+	public function testCheckNodeByIdentifier() {
+		$result = _archive_meta_import_check_node_by_identifier(FALSE);
+		$message = 'FALSE identifier should return FALSE';
+		$this->assertFalse($result, $message);
+
+		$result = _archive_meta_import_check_node_by_identifier(NULL);
+		$message = 'NULL identifier should return FALSE';
+		$this->assertFalse($result, $message);
+
+		$result = _archive_meta_import_check_node_by_identifier('');
+		$message = 'Empty identifier should return FALSE';
+		$this->assertFalse($result, $message);
+
+	}
+
+}

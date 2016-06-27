@@ -5,3 +5,4 @@ package = Custom
 dependencies[] = querypath
 files[] = archive_meta_import.admin.inc
 files[] = archive_meta_import.helpers.inc
+files[] = archive_meta_import.test
