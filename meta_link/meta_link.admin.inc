@@ -26,6 +26,7 @@ function meta_link_admin_form($form, &$form_state) {
 		);
 		$header['match_id'] = array('#markup' => '<th>' . t('Accept Match') . '</th>');
 		$header['record_title'] = array('#markup' => '<th>' . t('Record Title') . '</th>');
+		$header['repository_source'] = array('#markup' => '<th>' . t('Source Repository') . '</th>');
 		$header['recommended_work'] = array('#markup' => '<th>' . t('Suggested Work Reference') . '</th>');
 		$header['algorithm_step'] = array('#markup' => '<th>' . t('Algorithm Step') . '</th>');
 		$header['match_score'] = array('#markup' => '<th>' . t('Match Score') . '</th>');
@@ -47,6 +48,7 @@ function meta_link_admin_form($form, &$form_state) {
         '#suffix' => '</td>',
       );
       $rows[$match->id]['record_title'] = array('#markup' => '<td>' . l(t('@title', array('@title' => explode("|", $match->title_array)[0])), '/node/' . $match->record_id) . '</td>');
+      $rows[$match->id]['field_repository_source_value'] = array('#markup' => '<td>' . $match->field_repository_source_value . '</td>');
       $rows[$match->id]['recommended_work'] = array('#markup' => '<td>' . l(t('@title', array('@title' => $match->title)), '/node/' . $match->recommended_work_id) . '</td>');
       $rows[$match->id]['algorithm_step'] = array('#markup' => '<td>' . $match->algorithm_step . '</td>');
       $rows[$match->id]['match_score'] = array('#markup' => '<td>' . $match->match_score . '</td></tr>');

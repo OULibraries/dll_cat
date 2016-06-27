@@ -10,12 +10,12 @@ module_load_include('inc', 'meta_link', 'meta_link.helpers');
  * Implements hook_menu().
  */
 function meta_link_menu() {
-	$items['admin/content/match-algorithm'] = array(
-    'title' => 'Match archive records to the node',
+	$items['admin/DLL/match-algorithm'] = array(
+    'title' => 'Match repository item to the DLL work',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('meta_link_admin_form'),
     'access arguments' => array(1),
-    'type' => MENU_NORMAL_ITEM,
+    'type' => MENU_LOCAL_TASK,
     'file' => 'meta_link.admin.inc',
   );
   return $items;

@@ -5,3 +5,4 @@ package = Custom
 files[] = meta_link.install
 files[] = meta_link.helpers.inc
 dependencies[] = entityreference
+dependencies[] = archive_meta_import

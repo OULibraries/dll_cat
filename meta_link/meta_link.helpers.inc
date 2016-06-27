@@ -14,10 +14,12 @@ function _meta_link_get_matches() {
 	$query = db_select('node', 'n');
 	$query->join('meta_link_data', 'matches', 'n.nid = matches.record_id');
 	$query->join('field_data_field_record_title', 'title', 'title.entity_id = n.nid');
+	$query->join('field_data_field_repository_source', 'source_domain', 'source_domain.entity_id = n.nid');
 	$query->leftJoin('node', 'work', 'work.nid = matches.recommended_work_id');
 	$query->leftJoin('field_data_field_work_reference', 'ref', 'n.nid = ref.entity_id');
 	$query->addExpression("GROUP_CONCAT( DISTINCT title.field_record_title_value SEPARATOR '|' )", 'title_array');
 	$query->fields('matches', array('id', 'record_id', 'recommended_work_id', 'algorithm_step', 'match_score'))
+		    ->fields('source_domain', array('field_repository_source_value'))
 		    //->fields('title', array('field_record_title_value'))
 		    ->fields('work', array('title'));
 	$query->condition('n.type', 'metadata');

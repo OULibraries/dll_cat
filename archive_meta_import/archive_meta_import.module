@@ -10,13 +10,18 @@ module_load_include('inc', 'archive_meta_import', 'archive_meta_import.helpers')
  * Implements hook_menu().
  */
 function archive_meta_import_menu() {
-  $items['admin/content/import-settings'] = array(
-    'title' => 'Set Import URLs',
+  $items['admin/DLL'] = array(
+    'title' => 'DLL',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('archive_meta_import_admin_form'),
     'access arguments' => array(1),
-    'type' => MENU_NORMAL_ITEM,
+    'type' => MENU_LOCAL_TASK | MENU_NORMAL_ITEM,
     'file' => 'archive_meta_import.admin.inc',
+  );
+  $items['admin/DLL/import-settings'] = array(
+    'title' => 'Set Import URLs',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
   );
 
   return $items;
