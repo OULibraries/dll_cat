@@ -55,3 +55,16 @@ function meta_link_update_7001() {
   $table_name = 'meta_link_data';
   db_create_table($table_name, $schema[$table_name]);
 }
+
+
+/**
+ * Adds Rejected Flag field to meta_link_data table.
+ */
+function meta_link_update_7002() {
+  $spec = array(
+    'type' => 'int',
+    'description' => "Send Email Flag",
+    'length' => 1,
+  );
+  db_add_field( 'meta_link_data', 'is_rejected', $spec);
+}

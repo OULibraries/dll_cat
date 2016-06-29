@@ -24,6 +24,7 @@ function _meta_link_get_matches() {
 		    ->fields('work', array('title'));
 	$query->condition('n.type', 'metadata');
 	$query->condition('ref.field_work_reference_target_id', NULL, 'IS');
+	$query->condition('matches.is_rejected', NULL, 'IS');
 	$query->groupBy('matches.id');
 	$query->orderBy('matches.algorithm_step', 'ASC');
 	$query->orderBy('matches.match_score', 'DESC');
@@ -39,6 +40,7 @@ function _meta_link_get_matches() {
  */
 function _meta_link_delete_matches() {
 	$query = db_delete('meta_link_data')
+		->condition('meta_link_data.is_rejected', NULL, 'IS')
 		->execute();
 }
 
@@ -54,6 +56,17 @@ function _meta_link_accept_match_batch_init($matches_ids) {
 		'operations' => $operations,
 	);
 	return $batch;
+}
+
+function _meta_link_reject_match_batch_init($matches_ids) {
+	$operations = array();
+	$operations[] = array('_meta_link_mark_as_rejected', array($matches_ids));
+	$batch = array(
+		'title' => t('Rejecting matches'),
+		'operations' => $operations,
+	);
+	return $batch;
+
 }
 
 /**
@@ -378,7 +391,10 @@ function _meta_link_save_match_results($context) {
 			if (isset($context['results']['records'][$i]->work_match)) {
 				$record['recommended_work_id'] = $context['results']['records'][$i]->work_match->nid;
 			}
-			drupal_write_record('meta_link_data', $record);
+			$is_rejected = _meta_link_work_check_rejected($record['record_id']);
+			if (!$is_rejected) {
+				drupal_write_record('meta_link_data', $record);
+			}
 			$context['sandbox']['progress']++;
 			$context['message'] = t('Saving matches');
 		}
@@ -390,6 +406,26 @@ function _meta_link_save_match_results($context) {
 			$context['sandbox'] = array();
 			$context['finished'] = 1;
 		}
+	}
+}
+
+
+/**
+ * Helper function to check if the metadata record was rejected and shouldn't be matched anymore.
+ *
+ * @return TRUE | FALSE
+ *		if this record was previously rejected, FALSE otherwise.
+ */
+function _meta_link_work_check_rejected($record_id) {
+	$query = db_select('meta_link_data', 'meta');
+	$query->condition('meta.record_id', $record_id)
+			 ->fields('meta', array('record_id'));
+	$res = $query->execute()->fetchAll();
+	if(!empty($res)) {
+		return TRUE;
+	}
+	else {
+		return FALSE;
 	}
 }
 
@@ -433,6 +469,55 @@ function _meta_link_work_link_accept($matches_ids, $context) {
 		$context['sandbox'] = array();
 		$context['finished'] = 1;
 	}
+}
+
+
+/**
+ * Helper function to mark match as rejected.
+ *
+ * @param array matches_ids.
+ *		array of the rows ids in the matches table.
+ *
+ */
+function _meta_link_mark_as_rejected($matches_ids, $context) {
+	$limit = 1;
+	if (empty($context['sandbox'])) {
+		$context['sandbox']['progress'] = 0;
+		$context['sandbox']['current_record'] = 0;
+		$context['sandbox']['max'] = count($matches_ids);
+		$context['results']['matches'] = $matches_ids;
+		$context['sandbox']['offset'] = 0;
+	}
+	else {
+		$context['sandbox']['offset'] = $context['sandbox']['offset'] + $limit + 1;
+	}
+	$off = min($context['sandbox']['offset'] + $limit, $context['sandbox']['max'] - 1);
+	for ($i = $context['sandbox']['offset']; $i <= $off; $i++) {
+		_meta_link_set_reject_flag($context['results']['matches'][$i]);
+		$context['sandbox']['progress']++;
+		$context['message'] = t('Saving matches');
+	}
+
+	if ($context['sandbox']['progress'] < $context['sandbox']['max']) {
+		$context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
+	}
+	else {
+		$context['sandbox'] = array();
+		$context['finished'] = 1;
+	}
+}
+
+/**
+ * Helper function to apply rejected flag to the match.
+ *
+ * @param int match_id
+ *		id of the match row that needs to be updated.
+ */
+function _meta_link_set_reject_flag($match_id) {
+	$query = db_update('meta_link_data')
+				 ->fields(array('is_rejected' => 1))
+				 ->condition('meta_link_data.id', $match_id)
+				 ->execute();
 }
 
 /**

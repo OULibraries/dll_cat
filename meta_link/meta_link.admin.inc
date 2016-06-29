@@ -62,6 +62,16 @@ function meta_link_admin_form($form, &$form_state) {
 			'#value' => t('Accept Suggested Matches'),
 			'#submit' => array('meta_link_accept_matches_submit'),
 		);
+		$form['actions']['reject_matching'] = array(
+			'#type' => 'submit',
+			'#value' => t('Reject Suggested Matches'),
+			'#submit' => array('meta_link_reject_matches_submit'),
+		);
+		$form['actions']['clear_rejections'] = array(
+			'#type' => 'submit',
+			'#value' => t('Clear Rejected Flags'),
+			'#submit' => array('meta_link_clear_rejected_submit'),
+		);
 	}
 	else {
 		$form['matches'] = array('#markup' => '<div>There are currently no matches. Please run the matching algorithm by clicking the button below.</div>');
@@ -94,6 +104,35 @@ function meta_link_accept_matches_submit($form, &$form_state) {
 	}
 }
 
+
+/**
+ * Submit handler for Matching Algorithm form.
+ *
+ * @see meta_link_admin_form.
+ */
+function meta_link_reject_matches_submit($form, &$form_state) {
+	if (isset($form_state['values']['matches']['fields'])) {
+		$matches_ids = array();
+		foreach ($form_state['values']['matches']['fields'] as $id => $match) {
+			if ($match['match_id']) {
+				$matches_ids[] = $id;
+			}
+		}
+		$batch = _meta_link_reject_match_batch_init($matches_ids);
+		batch_set($batch);
+	}
+}
+
+/**
+ * Submit handler for Matching Algorithm form.
+ *
+ * @see meta_link_admin_form.
+ */
+function meta_link_clear_rejected_submit($form, &$form_state) {
+	$query = db_update('meta_link_data')
+				 ->fields(array('is_rejected' => NULL))
+				 ->execute();
+}
 /**
  * Submit handler for Matching Algorithm form.
  *
